@@ -1,0 +1,38 @@
+digraph spora_crypto{
+
+    CryptImportpbDataArg [label="pbData", cond="opcode beginswith push", getid="AESKey"]
+    CryptImporthProvArg [label="hProv", cond="opcode beginswith push"]
+    CryptImport [label="CryptImport", cond="opcode beginswith call", getid="CryptImport"]
+    CryptImportEnd [label="CryptImportEnd", cond=true, minreapeat=1, maxrepeat=3, lazyrepeat=true]
+    CryptImportJCC [label="CryptImportJCC", cond="opcode beginswith j and nchildren == 2"]
+
+    CryptDecryptStart [label="CryptoDecrypt Pushes", cond=true, minrepeat=6, maxrepeat=8, lazyrepeat=true]
+    CryptDecrypt [label="CryptDecrypt", cond="opcode beginswith call", getid="CryptDecrypt"]
+    CryptDecryptEnd [label="CryptDecryptEnd", cond=true, minreapeat=1, maxrepeat=3, lazyrepeat=true]
+
+    Inc [label="Incrementation", cond="opcode beginswith inc"]
+
+    DestroyStart [label="DestroyKey Pushes", cond=true, lazyrepeat=true]
+    DestroyKey [label="DestroyKey", cond="opcode beginswith call", getid="DestroyKey"]
+
+    End [label="End", cond=true, minreapeat=1, maxrepeat=4, lazyrepeat=true]
+    Ret [label="Ret", cond="opcode beginswith ret"]
+
+    CryptImportpbDataArg -> CryptImporthProvArg
+    CryptImporthProvArg -> CryptImport
+    CryptImport -> CryptImportEnd
+    CryptImportEnd -> CryptImportJCC
+    CryptImportJCC -> CryptDecryptStart
+    CryptImportJCC -> End
+
+    CryptDecryptStart -> CryptDecrypt
+    CryptDecrypt -> CryptDecryptEnd
+    CryptDecryptEnd -> Inc
+    CryptDecryptEnd -> DestroyStart
+
+    Inc -> DestroyStart
+
+    DestroyStart -> DestroyKey
+    DestroyKey -> End [childnumber=1]
+    End -> Ret
+}
